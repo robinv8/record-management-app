@@ -19,7 +19,7 @@ export default class RecordDetail extends React.Component {
               <Text>部位</Text>
             </View>
             <View style={{marginLeft: 48}}>
-              <Text></Text>
+              <Text>{record.PrjBW}</Text>
             </View>
           </View>
           <View style={styles.tr}>

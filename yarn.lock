@@ -2959,10 +2959,6 @@ react-native-maps@0.17.1:
   version "0.17.1"
   resolved "http://registry.npm.taobao.org/react-native-maps/download/react-native-maps-0.17.1.tgz#ab2236341fd984dac8864202ae55331bc262f60c"
 
-react-native-modal-picker@^0.0.16:
-  version "0.0.16"
-  resolved "http://registry.npm.taobao.org/react-native-modal-picker/download/react-native-modal-picker-0.0.16.tgz#c9324d880a3bb8f36b772f378164977e2f431cbc"
-
 react-native-modal-selector@^0.0.24:
   version "0.0.24"
   resolved "http://registry.npm.taobao.org/react-native-modal-selector/download/react-native-modal-selector-0.0.24.tgz#d5aa886b6782a4a3566452399deb21a8da7ae2a1"

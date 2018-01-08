@@ -83,9 +83,16 @@ export default class Home extends React.Component {
               </View>
             </View>
             <View style={styles.grid_wrap}>
-              <View style={[styles.grid_item, styles.item_left]}>
+              <TouchableOpacity onPress={() => {
+                const {pid, id} = this.state;
+                if (pid && id) {
+                  navigate('Record_1', {pid: pid, id: id, deep: 1, showType: 1})
+                } else {
+                  this.refs.toast.show('请选择项目和标段！');
+                }
+              }} style={[styles.grid_item, styles.item_left]}>
                 <Text style={styles.item_text}>监理审核</Text>
-              </View>
+              </TouchableOpacity>
               <View style={[styles.grid_item, styles.item_right]}>
                 <Text style={styles.item_text}>统计台账</Text>
               </View>
