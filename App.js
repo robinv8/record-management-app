@@ -17,19 +17,22 @@ const App = StackNavigator({
   Home: {
     screen: Home,
     navigationOptions: {
-      headerTitle: '首页',
-      headerBackTitle: null,
+      headerTitle: '甘肃省公路工程档案资料管理系统',
       headerStyle: {
-        marginTop: Platform.OS === 'ios' ? 0 : 25
-      }
+        marginTop: Platform.OS === 'ios' ? 0 : 25,
+        backgroundColor: '#1f1f1f',
+      },
+      headerTintColor: 'white'
     }
   },
   Record_1: {
     screen: Record_1,
-    navigationOptions:{
+    navigationOptions: {
       headerStyle: {
-        marginTop: Platform.OS === 'ios' ? 0 : 25
-      }
+        marginTop: Platform.OS === 'ios' ? 0 : 25,
+        backgroundColor: '#1f1f1f'
+      },
+      headerTintColor: 'white'
     }
   },
   RecordDetail: {
@@ -37,8 +40,10 @@ const App = StackNavigator({
     navigationOptions: {
       headerTitle: '资料详情',
       headerStyle: {
-        marginTop: Platform.OS === 'ios' ? 0 : 25
-      }
+        marginTop: Platform.OS === 'ios' ? 0 : 25,
+        backgroundColor: '#1f1f1f',
+      },
+      headerTintColor: 'white'
     }
   },
   Report: {
@@ -46,8 +51,10 @@ const App = StackNavigator({
     navigationOptions: {
       headerTitle: '检查记录表',
       headerStyle: {
-        marginTop: Platform.OS === 'ios' ? 0 : 25
-      }
+        marginTop: Platform.OS === 'ios' ? 0 : 25,
+        backgroundColor: '#1f1f1f',
+      },
+      headerTintColor: 'white'
     }
   }
 });

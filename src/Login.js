@@ -1,15 +1,40 @@
 import React from 'react';
-import {StyleSheet, Text, View, TextInput, TouchableOpacity,Image,Dimensions} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+  TouchableWithoutFeedback
+} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import {Ionicons} from '@expo/vector-icons';
 import {NavigationActions} from 'react-navigation';
 import Toast, {DURATION} from 'react-native-easy-toast'
+import Store from 'react-native-store';
+
 const {width} = Dimensions.get('window');
+const DB = {
+  'login': Store.model('login'),
+}
 export default class Login extends React.Component {
-  state = {
-    modalOpen: false,
-    userName: '',
-    userPwd: ''
+  constructor() {
+    super();
+    this.state = {
+      modalOpen: false,
+      userName: '',
+      userPwd: '',
+      checkedView: [],
+      checkStatus: false
+    }
+
+  }
+
+  componentDidMount() {
+    // Return all items
+    DB.login.find().then(resp => this.setState({userName: resp.userName}));
   }
 
   login() {
@@ -26,10 +51,28 @@ export default class Login extends React.Component {
     }).then(response => {
       const json = JSON.parse(response._bodyText);
       if (json.result) {
-        this.toHome();
+        DB.login.add({
+          userName: this.state.userName,
+        })
+        if (this.state.checkStatus) {
+          DB.login.add({
+            userPwd: this.state.userPwd
+          })
+        } else {
+
+        }
+
+        //this.toHome();
       } else {
         this.refs.toast.show(json.msg);
       }
+    })
+  }
+
+  check() {
+    this.setState({
+      checkedView: !this.state.checkStatus ? <Ionicons name="ios-checkmark-outline" size={18} color='white'/> : [],
+      checkStatus: !this.state.checkStatus
     })
   }
 
@@ -48,7 +91,8 @@ export default class Login extends React.Component {
         <View style={styles.container}>
           <KeyboardAwareScrollView style={styles.title_wrap}>
             <View style={{marginBottom: 50}}>
-              <Image source={require('../assets/title.png')} resizeMode={Image.resizeMode.contain} style={{width:width-100}}></Image>
+              <Image source={require('../assets/title.png')} resizeMode={Image.resizeMode.contain}
+                     style={{width: width - 100}}></Image>
             </View>
             <View style={[styles.input_wrap, {marginBottom: 12}]}>
               <View style={{
@@ -68,7 +112,7 @@ export default class Login extends React.Component {
                            underlineColorAndroid='transparent'></TextInput>
               </View>
             </View>
-            <View style={styles.input_wrap}>
+            <View style={[styles.input_wrap, {marginBottom: 12}]}>
               <View style={{
                 width: 42,
                 height: 42,
@@ -86,6 +130,21 @@ export default class Login extends React.Component {
                            underlineColorAndroid='transparent'></TextInput>
               </View>
             </View>
+            <TouchableWithoutFeedback onPress={() => this.check()}>
+              <View style={{flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center'}}>
+                <View style={{
+                  width: 12,
+                  height: 12,
+                  borderWidth: 1,
+                  borderColor: 'white',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {this.state.checkedView}
+                </View>
+                <Text style={{color: 'white', marginLeft: 5}}>记住密码</Text>
+              </View>
+            </TouchableWithoutFeedback>
             <View style={{flex: 1, flexDirection: 'row', height: 42, marginTop: 12}}>
               <TouchableOpacity onPress={() => this.login()}
                                 style={[styles.button, {flex: 2, marginRight: 3}]}>

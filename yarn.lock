@@ -2971,6 +2971,10 @@ react-native-safe-module@^1.1.0:
   dependencies:
     dedent "^0.6.0"
 
+react-native-store@^0.4.1:
+  version "0.4.1"
+  resolved "http://registry.npm.taobao.org/react-native-store/download/react-native-store-0.4.1.tgz#dc0c61021b9b033ae3c06660ec1985771aa4300c"
+
 "react-native-svg@https://github.com/expo/react-native-svg/archive/5.5.1-exp.1.tar.gz":
   version "5.5.1"
   resolved "https://github.com/expo/react-native-svg/archive/5.5.1-exp.1.tar.gz#0c6e373dbe63cfcbdd465f5b2965ebe011c8962f"

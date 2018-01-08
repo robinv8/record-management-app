@@ -6,11 +6,11 @@ export default class Record_1 extends React.Component {
   static navigationOptions = ({navigation}) => {
     if (navigation.state.params.deep > 1) {
       return {
-        title: navigation.state.params.text
+        title: navigation.state.params.text,
       }
     } else {
       return {
-        title:navigation.state.params.showType===1?'监理审核': '资料查看'
+        title: navigation.state.params.showType === 1 ? '监理审核' : '资料查看'
       }
     }
   }
@@ -107,7 +107,8 @@ export default class Record_1 extends React.Component {
             if (result.success) {
               console.log(result.FileName);
               navigate('Report', {
-                id: item.SQLID
+                id: item.SQLID,
+                CheckPass: item.CheckPass
               })
             }
           }
