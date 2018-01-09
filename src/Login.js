@@ -13,12 +13,10 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import {Ionicons} from '@expo/vector-icons';
 import {NavigationActions} from 'react-navigation';
 import Toast, {DURATION} from 'react-native-easy-toast'
-import Store from 'react-native-store';
+import {SecureStore} from 'expo';
 
 const {width} = Dimensions.get('window');
-const DB = {
-  'login': Store.model('login'),
-}
+
 export default class Login extends React.Component {
   constructor() {
     super();
@@ -29,13 +27,18 @@ export default class Login extends React.Component {
       checkedView: [],
       checkStatus: false
     }
-
   }
 
-  componentDidMount() {
-    // Return all items
-    DB.login.find().then(resp => this.setState({userName: resp.userName}));
-  }
+  componentWillMount = async () => {
+    const userName = await SecureStore.getItemAsync('userName');
+    const userPwd = await SecureStore.getItemAsync('userPwd');
+    this.setState({
+      userName: userName,
+      userPwd: userPwd,
+      checkStatus: userPwd ? true : false,
+      checkedView: userPwd ? <Ionicons name="ios-checkmark-outline" size={18} color='white'/> : [],
+    })
+  };
 
   login() {
     const myHeaders = new Headers();
@@ -48,21 +51,16 @@ export default class Login extends React.Component {
         userName: this.state.userName,
         userPwd: this.state.userPwd
       })
-    }).then(response => {
+    }).then(async response => {
       const json = JSON.parse(response._bodyText);
       if (json.result) {
-        DB.login.add({
-          userName: this.state.userName,
-        })
+        await SecureStore.setItemAsync('userName', this.state.userName);
         if (this.state.checkStatus) {
-          DB.login.add({
-            userPwd: this.state.userPwd
-          })
+          await SecureStore.setItemAsync('userPwd', this.state.userPwd);
         } else {
-
+          await SecureStore.deleteItemAsync('userPwd');
         }
-
-        //this.toHome();
+        this.toHome();
       } else {
         this.refs.toast.show(json.msg);
       }
@@ -86,13 +84,12 @@ export default class Login extends React.Component {
   }
 
   render() {
-
     return (
         <View style={styles.container}>
           <KeyboardAwareScrollView style={styles.title_wrap}>
             <View style={{marginBottom: 50}}>
               <Image source={require('../assets/title.png')} resizeMode={Image.resizeMode.contain}
-                     style={{width: width - 100}}></Image>
+                     style={{width: width - 100}}/>
             </View>
             <View style={[styles.input_wrap, {marginBottom: 12}]}>
               <View style={{
@@ -109,7 +106,7 @@ export default class Login extends React.Component {
                 <TextInput style={{height: 42, padding: 0,}}
                            onChangeText={(userName) => this.setState({userName})}
                            value={this.state.userName} placeholder="请输入您的账户"
-                           underlineColorAndroid='transparent'></TextInput>
+                           underlineColorAndroid='transparent'/>
               </View>
             </View>
             <View style={[styles.input_wrap, {marginBottom: 12}]}>
@@ -125,9 +122,11 @@ export default class Login extends React.Component {
               </View>
               <View style={{flex: 1, paddingLeft: 42}}>
                 <TextInput style={{height: 42, padding: 0}}
+                           secureTextEntry={true}
+                           blurOnSubmit={true}
                            onChangeText={(userPwd) => this.setState({userPwd})}
                            value={this.state.userPwd} placeholder="请输入您的密码"
-                           underlineColorAndroid='transparent'></TextInput>
+                           underlineColorAndroid='transparent'/>
               </View>
             </View>
             <TouchableWithoutFeedback onPress={() => this.check()}>
