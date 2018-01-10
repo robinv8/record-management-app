@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "record-management-app",
+    "name": "档案管理",
     "description": "This project is really great.",
     "slug": "record-management-app",
     "privacy": "public",
     "sdkVersion": "24.0.0",
     "platforms": ["ios", "android"],
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {

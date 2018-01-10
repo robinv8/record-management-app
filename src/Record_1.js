@@ -140,7 +140,7 @@ export default class Record_1 extends React.Component {
         <TouchableOpacity
             style={{flex: 1, alignItems: 'center', display: state.params.showType === 1 ? 'flex' : 'none'}}
             onPress={() => this.check(index)}>
-          <Image source={item.checked ? require('../assets/checked.jpg') : require('../assets/uncheck.jpg')}
+          <Image source={item.checked ? require('../assets/checked.png') : require('../assets/uncheck.jpg')}
                  resizeMode={Image.resizeMode.contain} style={{width: 20}}/>
         </TouchableOpacity>
         <TouchableOpacity style={{flex: 4, flexDirection: 'row', alignItems: 'center'}} onPress={() => {
@@ -308,7 +308,7 @@ export default class Record_1 extends React.Component {
                               onPress={() => this.allCheck()}>
               <Image
                   resizeMode={Image.resizeMode.contain} style={{width: 20}}
-                  source={(this.state.reportList.length > 0 && this.state.reportList.filter(item => !item.checked).length < 1 ) ? require('../assets/checked.jpg') : require('../assets/uncheck.jpg')}/>
+                  source={(this.state.reportList.length > 0 && this.state.reportList.filter(item => !item.checked).length < 1 ) ? require('../assets/checked.png') : require('../assets/uncheck.jpg')}/>
             </TouchableOpacity>
             <View style={{flex: 1, alignItems: 'center'}}>
               <Text style={{color: 'white'}}>资料状态</Text>
