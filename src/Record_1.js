@@ -1,6 +1,8 @@
 import React from 'react'
-import {View, Text, FlatList, TouchableNativeFeedback, TouchableOpacity} from 'react-native';
+import {View, Text, FlatList, TouchableNativeFeedback, TouchableOpacity, Image} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
+import {SecureStore} from 'expo';
+import Toast, {DURATION} from 'react-native-easy-toast'
 
 export default class Record_1 extends React.Component {
   static navigationOptions = ({navigation}) => {
@@ -35,6 +37,34 @@ export default class Record_1 extends React.Component {
     this.getMenu(params.pid, params.id);
   }
 
+  /**
+   * 审核
+   * @param id sqlId
+   * @param type 1通过 0不通过
+   */
+  audit(type) {
+    const items = this.state.reportList.filter(item => item.checked);
+    if (items.length < 1) {
+      this.refs.toast.show('请选择要操作的记录！');
+      return;
+    }
+    const ids = items.map(item => item.SQLID + '*#*');
+    const myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json; charset=utf-8');
+    fetch('http://61.178.231.106:9725/RightMain/AuditReport', {
+      method: 'post',
+      body: JSON.stringify({
+        AuditId: ids.toString().replace(/,/g, ''),
+        Type: type
+      }),
+      headers: myHeaders
+    }).then(result => {
+      if (result._bodyText) {
+        this.componentWillMount();
+      }
+    })
+  }
+
   async getReportList(id, page, showType, limit, start) {
     const {params} = this.props.navigation.state;
     showType = params.showType || '';
@@ -48,21 +78,36 @@ export default class Record_1 extends React.Component {
         newResult = this.state.reportList.map(item => item);
         this.setState({
           reportList: newResult,
-          noRecord: newResult.length > 0 ? false : true
+          noRecord: newResult.length <= 0
         })
 
       } else {
         this.setState({
           reportList: newResult,
-          noRecord: newResult.length > 0 ? false : true
+          noRecord: newResult.length <= 0
         })
       }
 
     }
   }
 
-  getListView(item) {
-    const {navigate} = this.props.navigation;
+  check(index) {
+    const newList = this.state.reportList;
+    newList[index].checked = !newList[index].checked;
+    this.setState({reportList: newList});
+  }
+
+  allCheck() {
+    const newList = this.state.reportList;
+    newList.map(item => {
+      item.checked = !item.checked;
+      return item
+    });
+    this.setState({reportList: newList});
+  }
+
+  getListView(item, index) {
+    const {navigate, state} = this.props.navigation;
     let CheckPassText = '';
     switch (item.CheckPass) {
       case 1:
@@ -91,42 +136,49 @@ export default class Record_1 extends React.Component {
       marginTop: 5,
       marginBottom: 2.5
     }}>
-      <TouchableOpacity onPress={() => {
-        const myHeaders = new Headers();
-        myHeaders.append('Content-Type', 'application/json; charset=utf-8');
-        fetch('http://61.178.231.106:9725/RightMain/GetReportUrl', {
-          method: 'post',
-          headers: myHeaders,
-          body: JSON.stringify({
-            SQLID: item.SQLID,
-            type: 1
-          })
-        }).then(result => {
-          if (result._bodyText) {
-            result = JSON.parse(result._bodyText);
-            if (result.success) {
-              console.log(result.FileName);
-              navigate('Report', {
-                id: item.SQLID,
-                CheckPass: item.CheckPass
-              })
+      <View style={{flex: 4, flexDirection: 'row', alignItems: 'center'}}>
+        <TouchableOpacity
+            style={{flex: 1, alignItems: 'center', display: state.params.showType === 1 ? 'flex' : 'none'}}
+            onPress={() => this.check(index)}>
+          <Image source={item.checked ? require('../assets/checked.jpg') : require('../assets/uncheck.jpg')}
+                 resizeMode={Image.resizeMode.contain} style={{width: 20}}/>
+        </TouchableOpacity>
+        <TouchableOpacity style={{flex: 4, flexDirection: 'row', alignItems: 'center'}} onPress={() => {
+          const myHeaders = new Headers();
+          myHeaders.append('Content-Type', 'application/json; charset=utf-8');
+          fetch('http://61.178.231.106:9725/RightMain/GetReportUrl', {
+            method: 'post',
+            headers: myHeaders,
+            body: JSON.stringify({
+              SQLID: item.SQLID,
+              type: 1
+            })
+          }).then(result => {
+            if (result._bodyText) {
+              result = JSON.parse(result._bodyText);
+              if (result.success) {
+                navigate('Report', {
+                  id: item.SQLID,
+                  CheckPass: item.CheckPass
+                })
+              }
             }
-          }
-        })
-      }}
-                        style={{flex: 4, flexDirection: 'row', alignItems: 'center'}}>
-        <View style={{flex: 1, alignItems: 'center'}}>
-          <Text
-              style={{color: 'rgb(0,133,72)'}}>{CheckPassText}</Text>
-        </View>
-        <View style={{flex: 1, alignItems: 'center'}}>
-          <Text
-              style={{color: 'rgb(0,133,72)'}}>{item.CheckPass === 1 ? (item.Num === 0 || item.Num === 1 ? 100 : (100 / item.Num).toFixed(2)) : 0.00}%</Text>
-        </View>
-        <View style={{flex: 2, alignItems: 'center'}}>
-          <Text style={{color: 'rgb(0,0,0)'}}>{item.RepName}</Text>
-        </View>
-      </TouchableOpacity>
+          })
+        }}>
+          <View style={{flex: 1, alignItems: 'center'}}>
+            <Text
+                style={{color: item.CheckPass === 1 ? 'rgb(0,133,72)' : '#59a5ef'}}>{CheckPassText}</Text>
+          </View>
+          <View style={{flex: 1, alignItems: 'center'}}>
+            <Text
+                style={{color: item.CheckPass === 1 ? 'rgb(0,133,72)' : 'red'}}>{item.CheckPass === 1 ? (item.Num === 0 || item.Num === 1 ? 100 : (100 / item.Num).toFixed(2)) : 0.00}%</Text>
+          </View>
+          <View style={{flex: 2, alignItems: 'center'}}>
+            <Text style={{color: 'rgb(0,0,0)'}}>{item.RepName}</Text>
+          </View>
+        </TouchableOpacity>
+
+      </View>
 
       <TouchableOpacity onPress={() => navigate('RecordDetail', {record: item})}
                         style={{flex: 1, alignItems: 'center', height: 50, justifyContent: 'center'}}>
@@ -195,13 +247,20 @@ export default class Record_1 extends React.Component {
       return (<FlatList data={this.state.listData}
                         renderItem={({item}) =>
                             <TouchableNativeFeedback
-                                onPress={() => navigate('Record_1', {
-                                  pid: params.pid,
-                                  id: item.key,
-                                  text: item.text,
-                                  deep: params.deep + 1,
-                                  showType: params.showType
-                                })}>
+                                onPress={async () => {
+                                  let bdc = await SecureStore.getItemAsync('bd-content') || [];
+
+                                  bdc = typeof bdc === 'object' ? bdc : bdc.split(',');
+                                  bdc.push(item.text);
+                                  await SecureStore.setItemAsync('bd-content', bdc.toString());
+                                  navigate('Record_1', {
+                                    pid: params.pid,
+                                    id: item.key,
+                                    text: item.text,
+                                    deep: params.deep + 1,
+                                    showType: params.showType
+                                  })
+                                }}>
                               <View style={{
                                 height: 50,
                                 marginLeft: 12,
@@ -229,9 +288,28 @@ export default class Record_1 extends React.Component {
         <Text>暂无记录！</Text>
       </View>
     }
+    let auditView = [];
+    if (params.showType === 1) {
+      auditView = <View style={{flexDirection: 'row'}}>
+        <TouchableOpacity style={{flex: 1, alignItems: 'center', justifyContent: 'center', height: 40}}
+                          onPress={() => this.audit(1)}>
+          <Text style={{color: '#59a5ef'}}>审核通过</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{flex: 1, alignItems: 'center', justifyContent: 'center', height: 40}}
+                          onPress={() => this.audit(0)}>
+          <Text>审核不通过</Text>
+        </TouchableOpacity>
+      </View>
+    }
     return (
         <View style={{flex: 1}}>
           <View style={{flexDirection: 'row', height: 35, alignItems: 'center', backgroundColor: 'rgb(119,119,119)',}}>
+            <TouchableOpacity style={{flex: 1, alignItems: 'center', display: params.showType === 1 ? 'flex' : 'none'}}
+                              onPress={() => this.allCheck()}>
+              <Image
+                  resizeMode={Image.resizeMode.contain} style={{width: 20}}
+                  source={(this.state.reportList.length > 0 && this.state.reportList.filter(item => !item.checked).length < 1 ) ? require('../assets/checked.jpg') : require('../assets/uncheck.jpg')}/>
+            </TouchableOpacity>
             <View style={{flex: 1, alignItems: 'center'}}>
               <Text style={{color: 'white'}}>资料状态</Text>
             </View>
@@ -252,7 +330,9 @@ export default class Record_1 extends React.Component {
               onEndReachedThreshold={0.1}
               onEndReached={() => this.addMore()}
               style={{backgroundColor: 'white'}} data={this.state.reportList}
-              renderItem={({item}) => this.getListView(item)}/>
+              renderItem={({item, index}) => this.getListView(item, index)}/>
+          {auditView}
+          <Toast ref="toast"></Toast>
         </View>
     );
   }

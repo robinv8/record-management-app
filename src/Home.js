@@ -3,7 +3,7 @@ import {StyleSheet, Text, View, Dimensions, TouchableOpacity, Platform, Image} f
 import ModalPicker from 'react-native-modal-selector'
 import Toast, {DURATION} from 'react-native-easy-toast'
 import {Ionicons} from '@expo/vector-icons';
-
+import {SecureStore} from 'expo';
 const {width} = Dimensions.get('window');
 export default class Home extends React.Component {
 
@@ -56,7 +56,8 @@ export default class Home extends React.Component {
                          style={{marginBottom: 10, flex: 1}}
                          selectStyle={{borderWidth: 0, alignItems: 'flex-start'}}
                          cancelText='取消'
-                         onChange={(option) => {
+                         onChange={async (option) => {
+                           await SecureStore.setItemAsync('projectName',option.label);
                            this.getMenu(option.key);
                            this.setState({name: option.label})
                          }}
@@ -68,7 +69,8 @@ export default class Home extends React.Component {
                          cancelText='取消'
                          style={{marginBottom: 10,flex:1}}
                          selectStyle={{borderWidth: 0, alignItems: 'flex-start'}}
-                         onChange={(option) => {
+                         onChange={async (option) => {
+                           await SecureStore.setItemAsync('biaoduan',option.label);
                            this.setState({id: option.id});
                            this.setState({name: option.label})
                          }}
@@ -78,9 +80,10 @@ export default class Home extends React.Component {
           <View style={{flex: 1}}>
             <View style={styles.grid_wrap}>
               <TouchableOpacity style={[styles.grid_item, styles.item_left]}
-                                onPress={() => {
+                                onPress={async () => {
                                   const {pid, id} = this.state;
                                   if (pid && id) {
+                                    await SecureStore.deleteItemAsync('bd-content');
                                     navigate('Record_1', {pid: pid, id: id, deep: 1})
                                   } else {
                                     this.refs.toast.show('请选择项目和标段！');
