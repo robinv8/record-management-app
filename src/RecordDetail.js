@@ -1,16 +1,33 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, Button, TouchableOpacity} from 'react-native';
 import {SecureStore} from 'expo';
+import {Ionicons} from '@expo/vector-icons';
 
 export default class RecordDetail extends React.Component {
   constructor() {
     super();
     this.state = {
-      fbfx: ''// 所属分部分项
+      fbfx: '',// 所属分部分项,
+      sqlId: ''
     }
   }
 
+  static navigationOptions = ({navigation}) => {
+    return {
+      headerRight: <TouchableOpacity onPress={() => navigation.navigate('HistoryAudit', {SQLID: navigation.state.params.record.SQLID})}
+                                     style={{
+                                       flex: 1,
+                                       alignItems: 'center',
+                                       width: 50,
+                                       height: 50,
+                                       justifyContent: 'center'
+                                     }}>
+        <Ionicons name="md-time" size={25} color={'white'}/>
+      </TouchableOpacity>
+    }
+  };
   componentDidMount = async () => {
+
     let bdc = (await SecureStore.getItemAsync('bd-content')).split(',');
     const projectName = await SecureStore.getItemAsync('projectName');
     const biaoduan = await SecureStore.getItemAsync('biaoduan');
@@ -18,7 +35,7 @@ export default class RecordDetail extends React.Component {
     bdc.splice(0, 0, projectName);
     bdc = bdc.toString().replace(/,/g, '>');
     this.setState({
-      fbfx: bdc
+      fbfx: bdc,
     })
   }
 
@@ -68,6 +85,14 @@ export default class RecordDetail extends React.Component {
           </View>
           <View style={styles.tr}>
             <View style={{width: 60}}>
+              <Text>上传时间</Text>
+            </View>
+            <View style={{paddingLeft: 48}}>
+              <Text>{record.SendDT}</Text>
+            </View>
+          </View>
+          <View style={styles.tr}>
+            <View style={{width: 60}}>
               <Text>审核时间</Text>
             </View>
             <View style={{paddingLeft: 48}}>
@@ -97,7 +122,7 @@ export default class RecordDetail extends React.Component {
 const styles = StyleSheet.create({
   tr: {
     flexDirection: 'row',
-    height: 50,
+    minHeight: 50,
     alignItems: 'center',
     backgroundColor: 'rgb(242,239,239)',
     marginTop: 5,

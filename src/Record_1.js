@@ -2,16 +2,56 @@ import React from 'react'
 import {View, Text, FlatList, TouchableNativeFeedback, TouchableOpacity, Image} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {SecureStore} from 'expo';
-import Toast, {DURATION} from 'react-native-easy-toast'
+import Toast, {DURATION} from 'react-native-easy-toast';
+import Spinner from 'react-native-loading-spinner-overlay';
+import DialogBox from 'react-native-dialogbox';
 
 export default class Record_1 extends React.Component {
   static navigationOptions = ({navigation}) => {
     if (navigation.state.params.deep > 1) {
       return {
         title: navigation.state.params.text,
+        headerLeft: (
+            <TouchableOpacity onPress={async () => {
+              let bdc = (await SecureStore.getItemAsync('bd-content'));
+              if (bdc) {
+                bdc = bdc.split(',');
+                bdc.pop();
+                await SecureStore.setItemAsync('bd-content', bdc.toString());
+              }
+              navigation.goBack()
+            }} style={{
+              flex: 1,
+              alignItems: 'center',
+              width: 50,
+              height: 50,
+              justifyContent: 'center'
+            }}>
+              <Ionicons name='md-arrow-back' size={24} color='white'/>
+            </TouchableOpacity>
+        )
       }
     } else {
       return {
+        headerLeft: (
+            <TouchableOpacity onPress={async () => {
+              let bdc = (await SecureStore.getItemAsync('bd-content'))
+              if (bdc) {
+                bdc = bdc.split(',');
+                bdc.pop();
+                await SecureStore.setItemAsync('bd-content', bdc.toString());
+              }
+              navigation.goBack()
+            }} style={{
+              flex: 1,
+              alignItems: 'center',
+              width: 50,
+              height: 50,
+              justifyContent: 'center'
+            }}>
+              <Ionicons name='md-arrow-back' size={24} color='white'/>
+            </TouchableOpacity>
+        ),
         title: navigation.state.params.showType === 1 ? '监理审核' : '资料查看'
       }
     }
@@ -28,7 +68,8 @@ export default class Record_1 extends React.Component {
       showType: 0,
       page: 1,
       limit: 10,
-      noRecord: false
+      noRecord: false,
+      visible: true,
     }
   }
 
@@ -48,21 +89,32 @@ export default class Record_1 extends React.Component {
       this.refs.toast.show('请选择要操作的记录！');
       return;
     }
-    const ids = items.map(item => item.SQLID + '*#*');
-    const myHeaders = new Headers();
-    myHeaders.append('Content-Type', 'application/json; charset=utf-8');
-    fetch('http://61.178.231.106:9725/RightMain/AuditReport', {
-      method: 'post',
-      body: JSON.stringify({
-        AuditId: ids.toString().replace(/,/g, ''),
-        Type: type
-      }),
-      headers: myHeaders
-    }).then(result => {
-      if (result._bodyText) {
-        this.componentWillMount();
+    this.dialogbox.confirm({
+      content: '是否确定操作?',
+      ok: {
+        text: '确定',
+        callback: () => {
+          const ids = items.map(item => item.SQLID + '*#*');
+          const myHeaders = new Headers();
+          myHeaders.append('Content-Type', 'application/json; charset=utf-8');
+          fetch('http://61.178.231.106:9725/RightMain/AuditReport', {
+            method: 'post',
+            body: JSON.stringify({
+              AuditId: ids.toString().replace(/,/g, ''),
+              Type: type
+            }),
+            headers: myHeaders
+          }).then(result => {
+            if (result._bodyText) {
+              this.componentWillMount();
+            }
+          })
+        },
+      },
+      cancel: {
+        text: '取消'
       }
-    })
+    });
   }
 
   async getReportList(id, page, showType, limit, start) {
@@ -78,13 +130,15 @@ export default class Record_1 extends React.Component {
         newResult = this.state.reportList.map(item => item);
         this.setState({
           reportList: newResult,
-          noRecord: newResult.length <= 0
+          noRecord: newResult.length <= 0,
+          visible: false
         })
 
       } else {
         this.setState({
           reportList: newResult,
-          noRecord: newResult.length <= 0
+          noRecord: newResult.length <= 0,
+          visible: false
         })
       }
 
@@ -167,11 +221,11 @@ export default class Record_1 extends React.Component {
         }}>
           <View style={{flex: 1, alignItems: 'center'}}>
             <Text
-                style={{color: item.CheckPass === 1 ? 'rgb(0,133,72)' : '#59a5ef'}}>{CheckPassText}</Text>
+                style={{color: item.CheckPass === 1 ? 'rgb(0,133,72)' : item.CheckPass === 0 ? '#013cc1' : '#c40000'}}>{CheckPassText}</Text>
           </View>
           <View style={{flex: 1, alignItems: 'center'}}>
             <Text
-                style={{color: item.CheckPass === 1 ? 'rgb(0,133,72)' : 'red'}}>{item.CheckPass === 1 ? (item.Num === 0 || item.Num === 1 ? 100 : (100 / item.Num).toFixed(2)) : 0.00}%</Text>
+                style={{color: item.CheckPass === 1 && (item.Num === 0 || item.Num === 1) ? 'rgb(0,133,72)' : 'red'}}>{item.CheckPass === 1 ? (item.Num === 0 || item.Num === 1 ? 100 : (100 / item.Num).toFixed(2)) : 0.00}%</Text>
           </View>
           <View style={{flex: 2, alignItems: 'center'}}>
             <Text style={{color: 'rgb(0,0,0)'}}>{item.RepName}</Text>
@@ -207,11 +261,12 @@ export default class Record_1 extends React.Component {
     const result = await fetch(`http://61.178.231.106:9725/Home/GetMenus?PrjID=${pid}&node=${id}`)
         .then(result => result);
     if (result._bodyText) {
+
       const newResult = JSON.parse(result._bodyText).map(item => {
         item.key = item.id;
         return item;
       });
-      this.setState({listData: newResult});
+      this.setState({listData: newResult, visible: false});
     } else {
       this.getReportList(id);
       this.setState({isDetail: true, reportId: id})
@@ -223,6 +278,12 @@ export default class Record_1 extends React.Component {
   }
 
   render() {
+
+    if (this.state.visible) {
+      return (
+          <Spinner visible={true} textContent={"加载中……"} textStyle={{color: '#000', fontSize: 15}}></Spinner>
+      );
+    }
     const {navigate} = this.props.navigation;
     const {params} = this.props.navigation.state;
     let backColor = '';
@@ -308,7 +369,7 @@ export default class Record_1 extends React.Component {
                               onPress={() => this.allCheck()}>
               <Image
                   resizeMode={Image.resizeMode.contain} style={{width: 20}}
-                  source={(this.state.reportList.length > 0 && this.state.reportList.filter(item => !item.checked).length < 1 ) ? require('../assets/checked.png') : require('../assets/uncheck.jpg')}/>
+                  source={(this.state.reportList.length > 0 && this.state.reportList.filter(item => !item.checked).length === 0 ) ? require('../assets/checked.png') : require('../assets/uncheck.jpg')}/>
             </TouchableOpacity>
             <View style={{flex: 1, alignItems: 'center'}}>
               <Text style={{color: 'white'}}>资料状态</Text>
@@ -332,6 +393,9 @@ export default class Record_1 extends React.Component {
               style={{backgroundColor: 'white'}} data={this.state.reportList}
               renderItem={({item, index}) => this.getListView(item, index)}/>
           {auditView}
+          <DialogBox ref={dialogbox => {
+            this.dialogbox = dialogbox
+          }}/>
           <Toast ref="toast"></Toast>
         </View>
     );

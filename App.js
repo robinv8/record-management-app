@@ -6,7 +6,7 @@ import Login from './src/Login';
 import Record_1 from './src/Record_1';
 import RecordDetail from './src/RecordDetail';
 import Report from './src/Report'
-
+import HistoryAudit from './src/HistoryAudit'
 const App = StackNavigator({
   Login: {
     screen: Login,
@@ -44,12 +44,24 @@ const App = StackNavigator({
         backgroundColor: '#1f1f1f',
       },
       headerTintColor: 'white'
+
     }
   },
   Report: {
     screen: Report,
     navigationOptions: {
       headerTitle: '检查记录表',
+      headerStyle: {
+        marginTop: Platform.OS === 'ios' ? 0 : 25,
+        backgroundColor: '#1f1f1f',
+      },
+      headerTintColor: 'white'
+    }
+  },
+  HistoryAudit: {
+    screen: HistoryAudit,
+    navigationOptions: {
+      headerTitle: '查看资料历史',
       headerStyle: {
         marginTop: Platform.OS === 'ios' ? 0 : 25,
         backgroundColor: '#1f1f1f',
