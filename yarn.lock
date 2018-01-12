@@ -2916,12 +2916,6 @@ react-native-branch@2.0.0-beta.3:
   version "2.0.0-beta.3"
   resolved "http://registry.npm.taobao.org/react-native-branch/download/react-native-branch-2.0.0-beta.3.tgz#2167af86bbc9f964bd45bd5f37684e5b54965e32"
 
-react-native-dialogbox@^0.6.8:
-  version "0.6.8"
-  resolved "http://registry.npm.taobao.org/react-native-dialogbox/download/react-native-dialogbox-0.6.8.tgz#750b4011d9ff8850a42546e7b28869b21fdf1936"
-  dependencies:
-    prop-types "^15.6.0"
-
 react-native-dismiss-keyboard@1.0.0:
   version "1.0.0"
   resolved "http://registry.npm.taobao.org/react-native-dismiss-keyboard/download/react-native-dismiss-keyboard-1.0.0.tgz#32886242b3f2317e121f3aeb9b0a585e2b879b49"

@@ -5,7 +5,6 @@
     "expo": "^24.0.0",
     "react": "16.0.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-24.0.0.tar.gz",
-    "react-native-dialogbox": "^0.6.8",
     "react-native-easy-toast": "^1.0.9",
     "react-native-keyboard-aware-scroll-view": "^0.4.1",
     "react-native-loading-spinner-overlay": "^0.5.2",

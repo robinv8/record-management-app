@@ -86,7 +86,7 @@ export default class HistoryAudit extends React.Component {
   addMore() {
     const {params} = this.props.navigation.state;
     this.setState({page: this.state.page + 1});
-    this.getReportList(tparams.SQLID, this.state.page)
+    this.getAuditList(params.SQLID, this.state.page)
   }
 
   render() {

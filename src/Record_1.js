@@ -1,10 +1,9 @@
 import React from 'react'
-import {View, Text, FlatList, TouchableNativeFeedback, TouchableOpacity, Image} from 'react-native';
+import {View, Text, FlatList, TouchableNativeFeedback, TouchableOpacity, Image,Alert} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {SecureStore} from 'expo';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import Spinner from 'react-native-loading-spinner-overlay';
-import DialogBox from 'react-native-dialogbox';
 
 export default class Record_1 extends React.Component {
   static navigationOptions = ({navigation}) => {
@@ -89,32 +88,30 @@ export default class Record_1 extends React.Component {
       this.refs.toast.show('请选择要操作的记录！');
       return;
     }
-    this.dialogbox.confirm({
-      content: '是否确定操作?',
-      ok: {
-        text: '确定',
-        callback: () => {
-          const ids = items.map(item => item.SQLID + '*#*');
-          const myHeaders = new Headers();
-          myHeaders.append('Content-Type', 'application/json; charset=utf-8');
-          fetch('http://61.178.231.106:9725/RightMain/AuditReport', {
-            method: 'post',
-            body: JSON.stringify({
-              AuditId: ids.toString().replace(/,/g, ''),
-              Type: type
-            }),
-            headers: myHeaders
-          }).then(result => {
-            if (result._bodyText) {
-              this.componentWillMount();
-            }
-          })
-        },
-      },
-      cancel: {
-        text: '取消'
-      }
-    });
+    Alert.alert(
+        '提示',
+        '是否确定操作？',
+        [
+          {text: '否'},
+          {text: '是', onPress: () => {
+              const ids = items.map(item => item.SQLID + '*#*');
+              const myHeaders = new Headers();
+              myHeaders.append('Content-Type', 'application/json; charset=utf-8');
+              fetch('http://61.178.231.106:9725/RightMain/AuditReport', {
+                method: 'post',
+                body: JSON.stringify({
+                  AuditId: ids.toString().replace(/,/g, ''),
+                  Type: type
+                }),
+                headers: myHeaders
+              }).then(result => {
+                if (result._bodyText) {
+                  this.componentWillMount();
+                }
+              })
+            }},
+        ]
+    )
   }
 
   async getReportList(id, page, showType, limit, start) {
@@ -393,9 +390,6 @@ export default class Record_1 extends React.Component {
               style={{backgroundColor: 'white'}} data={this.state.reportList}
               renderItem={({item, index}) => this.getListView(item, index)}/>
           {auditView}
-          <DialogBox ref={dialogbox => {
-            this.dialogbox = dialogbox
-          }}/>
           <Toast ref="toast"></Toast>
         </View>
     );
